@@ -1,0 +1,53 @@
+name: Daily Contribution Streak
+
+on:
+  schedule:
+    # Runs at midnight UTC daily
+    - cron: '0 0 * * *'
+  workflow_dispatch:  # Allows manual triggering
+
+jobs:
+  create-commits:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1  # Shallow clone for efficiency
+      
+      - name: Setup Git
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      
+      - name: Generate commits
+        run: |
+          # Generate random number between 40 and 50
+          COMMIT_COUNT=$(( $RANDOM % 11 + 40 ))
+          echo "Will create $COMMIT_COUNT commits"
+          
+          # Create commits
+          for i in $(seq 1 $COMMIT_COUNT)
+          do
+            # Get current timestamp
+            TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            
+            # Update streak file with commit info
+            echo "Commit #$i of $COMMIT_COUNT on $TIMESTAMP" > streak.txt
+            
+            # Create commit
+            git add streak.txt
+            git commit -m "feat: daily contribution #$i/$COMMIT_COUNT [$TIMESTAMP]"
+            
+            # Add small delay to space out commits
+            sleep 1
+          done
+      
+      - name: Push changes
+        run: |
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
