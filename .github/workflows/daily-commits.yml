@@ -2,9 +2,8 @@ name: Daily Contribution Streak
 
 on:
   schedule:
-    # Runs at midnight UTC daily
     - cron: '0 0 * * *'
-  workflow_dispatch:  # Allows manual triggering
+  workflow_dispatch:
 
 jobs:
   create-commits:
@@ -16,38 +15,33 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1  # Shallow clone for efficiency
+          ref: main  # Ensure default branch
+          fetch-depth: 1
       
       - name: Setup Git
         run: |
-          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.email "gamingcristy19@gmail.com"
+          git config --local user.name "Burhanali2211"
       
       - name: Generate commits
         run: |
-          # Generate random number between 40 and 50
-          COMMIT_COUNT=$(( $RANDOM % 11 + 40 ))
+          COMMIT_COUNT=3  # Limited to avoid spam detection
           echo "Will create $COMMIT_COUNT commits"
           
-          # Create commits
           for i in $(seq 1 $COMMIT_COUNT)
           do
-            # Get current timestamp
             TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+            # Append to streak.txt for meaningful change
+            echo "Commit #$i on $TIMESTAMP" >> streak.txt
             
-            # Update streak file with commit info
-            echo "Commit #$i of $COMMIT_COUNT on $TIMESTAMP" > streak.txt
-            
-            # Create commit
             git add streak.txt
             git commit -m "feat: daily contribution #$i/$COMMIT_COUNT [$TIMESTAMP]"
             
-            # Add small delay to space out commits
-            sleep 1
+            sleep 60  # Delay to space commits
           done
       
       - name: Push changes
         run: |
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
